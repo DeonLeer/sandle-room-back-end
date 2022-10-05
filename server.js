@@ -10,28 +10,6 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-const db = require("./app/models");
-
-const Role = db.role;
-
-// db.sequelize.sync({force: true}).then(() => {
-//     console.log('Drop and Resync Db');
-//     initial();
-//   });
-db.sequelize.sync();
-
-function initial() {
-    Role.create({
-        id: 1,
-        name: "user",
-    });
-
-    Role.create({
-        id: 2,
-        name: "admin",
-    });
-}
-
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 
