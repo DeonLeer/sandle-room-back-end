@@ -22,7 +22,7 @@ exports.signup = (req, res) => {
         if (req.body.roles?.length) {
           let placeholder = [];
           let values = [];
-          for (let id in req.body.roles) {
+          for (let id of req.body.roles) {
             placeholder.push("( ?, ? )");
             values.push(Number(id), newUserId);
           }
