@@ -10,13 +10,12 @@ module.exports = function (app) {
     next();
   });
 
-  app.get('/api/appointments/get/user', [authJwt.verifyToken], controller.getUserAppointments)
+  app.get('/api/appointments', [authJwt.verifyToken], controller.getAppointmentsByMonth)
+  
+  app.post('/api/appointments', [authJwt.verifyToken], controller.createAppointment)
 
-  app.get('/api/appointments/get/admin', [authJwt.verifyToken, authJwt.isAdmin], controller.getAdminAppointments)
+  app.patch('/api/appointments', [authJwt.verifyToken], controller.editAppointment)
 
-  app.post('/api/appointments/create/user', [authJwt.verifyToken], controller.createUserAppointment)
-
-  app.post('/api/appointments/create/admin', [authJwt.verifyToken, authJwt.isAdmin], controller.createAdminAppointment)
-
-  app.post('/api/appointments/accept/admin', [authJwt.verifyToken, authJwt.isAdmin, controller.acceptAppointment])
+  app.delete('/api/appointments', [authJwt.verifyToken], controller.deleteAppointment)
+  
 };
