@@ -5,69 +5,88 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 
-exports.getUserAppointments = (req, res) => {
+
+exports.getAppointmentsByMonth = (req, res) => {
     const userId = req.userId;
-    connection.query("SELECT * FROM appointments WHERE clientUserId = ?", [userId], (err, result) => {
-        if (err) {
-            res.status(500).send({message: err.message})
-        } else {
-            res.status(200).send(result)
+    const isAdmin = req.roles.includes(2);
+    const month = req.query.month;
+    const year = req.query.year;
+    const query = `
+        SELECT appointments.datetime, ${isAdmin ?
+        'clientUser.firstName, clientUser.lastName'
+        :
+        'hostUser.firstName, hostUser.lastName'
         }
-    })
+        FROM appointments
+        JOIN users AS hostUser ON appointments.hostUserId = hostUser.id
+        JOIN users AS clientUser ON appointments.clientUserId = clientUser.id
+        WHERE ${ isAdmin ? "host" : "client" }User.id = ${userId} AND appointments.datetime LIKE '${year}-${month}%'
+    `;
+    connection.query(query, (err, result) => {
+      if (err) {
+        res.status(400).send({ message: err.message });
+      } else {
+        res.status(200).send(result);
+      }
+    });
 }
 
-exports.getAdminAppointments = (req, res) => {
-    const userId = req.userId;
-    connection.query("SELECT * FROM appointments WHERE hostUserId = ? AND accepted = 1", [userId], (err, result) => {
-        if (err) {
-            res.status(500).send({message: err.message})
-        } else {
-            res.status(200).send(result)
-        }
+exports.createAppointment = (req, res) => {
+  
+  let error = {error: false, message: ""};
+
+  if (req.roles.includes(2)) {
+    if (req.body.hostId != req.userId) {
+      error.error = true;
+      error.message = "Invalid appointment host"
+    } else if (req.body.clientId == req.userId) {
+      error.error = true;
+      error.message = "Invalid appointment client"
+    }
+  } else {
+    if (req.body.clientId != req.userId) {
+      error.error = true;
+      error.message = "Invalid appointment client"
+    } else if (req.body.hostId == req.userId) {
+      error.error = true;
+      error.message = "Invalid appointment host"
+    }
+  }
+
+  if (error.error === true) {
+   res.status(400).send(error) 
+  } else {
+    connection.query("INSERT INTO appointments (clientUserId, hostUserId, startTime, endTime) VALUES (?, ?, ?, ?", [
+      req.body.clientId, req.body.hostId, req.body.startTime, req.body.endTime
+    ], (err, result) => {
+      if (err) {
+        res.status(400).send(err)
+      } else {
+        res.status(200).send(result)
+      }
     })
+  }
+
+
+
+
 }
 
-exports.getRequestedAppointments = (req, res) => {
-    const userId = req.userId;
-    connection.query("SELECT * FROM appointments WHERE hostUserId = ? AND accepted = 0", [userId], (err, result) => {
-        if (err) {
-            res.status(500).send({message: err.message})
-        } else {
-            res.status(200).send(result)
-        }
-    })
+exports.editAppointment = (req, res) => {
+
+  res.status(200)
+
 }
 
-exports.createUserAppointment = (req, res) => {
-    const userId = req.userId;
-    connection.query("INSERT INTO appointments (date, clientUserId, hostUserId, timeBlock) VALUES (?, ?, ?, ?)",
-    [req.body.date, userId, req.body.hostId, req.body.timeblock], (err, result) => {
-        if (err) {
-            res.status(400).send({message: err.message})
-        } else {
-            res.status(200).send(result)
-        }
-    })
+exports.deleteAppointment = (req, res) => {
+
+  connection.query(`DELETE FROM appointments WHERE id = ? AND ${req.body.includes(2) ? 'host' : 'client'}UserId = ${req.userId}`, [req.body.id], (err, result) => {
+    if (err) {
+      res.status(400).send(err)
+    } else {
+      res.status(400).send(result)
+    }
+  })
+
 }
 
-exports.createAdminAppointment = (req, res) => {
-    const userId = req.userId;
-    connection.query("INSERT INTO appointments (date, clientUserId, hostUserId, timeBlock, accepted) VALUES (?, ?, ?, ?, ?)",
-    [req.body.date, req.body.userId, userId, req.body.timeblock, 1], (err, result) => {
-        if (err) {
-            res.status(400).send({message: err.message})
-        } else {
-            res.status(200).send(result)
-        }
-    })
-}
-
-exports.acceptAppointment = (req, res) => {
-    connection.query("UPDATE appointments SET accepted = 1 WHERE id = ?", [req.body.appointmentId], (err, result) => {
-        if (err) {
-            res.status(400).send({message: err.message})
-        } else {
-            res.status(200).send(result)
-        }
-    })
-}
