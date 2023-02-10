@@ -10,7 +10,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.get('/api/appointments', [authJwt.verifyToken], controller.getAppointmentsByMonth)
+  app.get('/api/appointments', [authJwt.verifyToken], controller.getAppointments)
   
   app.post('/api/appointments', [authJwt.verifyToken], controller.createAppointment)
 
