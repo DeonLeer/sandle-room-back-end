@@ -1,3 +1,3 @@
 module.exports = {
-    secret: "sandle-feet-bauer-autumn"
+    secret: process.env.JWT_SECRET
   };
