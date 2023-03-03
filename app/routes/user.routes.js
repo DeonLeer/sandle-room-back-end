@@ -13,14 +13,13 @@ module.exports = function (app) {
 
 	app.get("/api/test/admin", [authJwt.verifyToken, authJwt.isAdmin], controller.adminBoard);
 
-  app.get("/api/client", [authJwt.verifyToken, authJwt.isAdmin], controller.getClient);
+	app.get("/api/users/client", [authJwt.verifyToken, authJwt.isAdmin], controller.getClient);
 
-  app.get("/api/clients", [authJwt.verifyToken, authJwt.isAdmin], controller.getClients);
+	app.get("/api/users/clients", [authJwt.verifyToken, authJwt.isAdmin], controller.getClients);
 
-  app.get("/api/hosts", [authJwt.verifyToken], controller.getHosts);
+	app.get("/api/users/hosts", [authJwt.verifyToken], controller.getHosts);
 
-  app.post("/api/client", [authJwt.verifyToken], controller.createPatientInfo);
+	app.post("/api/users/client", [authJwt.verifyToken], controller.createPatientInfo);
 
-  app.patch("/api/client", [authJwt.verifyToken], controller.editPatientInfo);
-
+	app.patch("/api/users/client", [authJwt.verifyToken], controller.editPatientInfo);
 };
