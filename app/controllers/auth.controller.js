@@ -40,12 +40,13 @@ exports.signin = (req, res) => {
 					user.password
 				);
 				if (passwordIsValid) {
+					const token = jwt.sign( { id: user.id, role: user.role }, config.secret, { expiresIn: 86400 * 14 } );
 					res.status(200).send({
 						id: user.id,
 						firstname: user.firstName,
 						lastname: user.lastName,
 						email: user.email,
-						roles: user.role,
+						role: user.role,
 						phone: user.phone,
 						accessToken: token,
 					});
