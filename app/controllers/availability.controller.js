@@ -45,13 +45,40 @@ exports.deleteDefaultAvailability = (req, res) => {
 
 exports.getAvailabilitiesByMonth = (req, res) => {
 	connection.query(
-		"SELECT * FROM availability WHERE MONTH(startTime) = ? AND YEAR(startTime) = ? ",
-		[req.body.month, req.body.year],
-		(err, result) => {
+		"SELECT * FROM custom_availabilities WHERE MONTH(startTime) = ? AND YEAR(startTime) = ? AND hostId = ?",
+		[req.body.month, req.body.year, req.body.hostId],
+		(err, custom_availabilities) => {
 			if (err) {
 				res.status(400).send(err);
 			} else {
-				res.status(200).send(result);
+				connection.query("SELECT * FROM default_availabilities WHERE hostId = ?", [req.body.hostId],
+				(err, default_availabilities) => {
+					if (err) {
+						res.status(400).send(err);
+					} else {
+						connection.query("SELECT * FROM canceled_availabilities WHERE MONTH(date) = ? AND YEAR(date) = ? AND hostId = ?",
+						[req.body.month, req.body.year, req.body.hostId],
+						(err, canceled_availabilities) => {
+							if (err) {
+								res.status(400).send(err);
+							} else {
+								connection.query("SELECT * FROM appointments WHERE MONTH(date) = ? AND YEAR(date) = ? AND hostId = ?",
+								[req.body.month, req.body.year, req.body.hostId],
+								(err, appointments) => {
+									if (err) {
+										res.status(400).send(err);
+									} else {
+										let days = new Date(req.body.year, req.body.month, 0).getDate();
+										let availabilities = {};
+										for (let i = 1; i <= days; i++) {
+											
+										}
+									}
+								})
+							}
+						})
+					}
+				})
 			}
 		}
 	);
