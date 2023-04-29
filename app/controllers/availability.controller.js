@@ -56,6 +56,14 @@ exports.getAvailabilitiesByMonth = (req, res) => {
 					if (err) {
 						res.status(400).send(err);
 					} else {
+						let defaultAvailabilities = {}
+						for (let availability in default_availabilities) {
+							if (defaultAvailabilities[availability.weekday]) {
+								defaultAvailabilities.weekday.push(availability)
+							} else {
+								defaultAvailabilities.weekday = [availability]
+							}
+						}
 						connection.query("SELECT * FROM canceled_availabilities WHERE MONTH(date) = ? AND YEAR(date) = ? AND hostId = ?",
 						[req.body.month, req.body.year, req.body.hostId],
 						(err, canceled_availabilities) => {
@@ -71,7 +79,9 @@ exports.getAvailabilitiesByMonth = (req, res) => {
 										let days = new Date(req.body.year, req.body.month, 0).getDate();
 										let availabilities = {};
 										for (let i = 1; i <= days; i++) {
-											
+											let day = new Date(`${req.body.year}-${req.body.month}-${i}`)
+											let weekDay = day.getDay();
+
 										}
 									}
 								})
